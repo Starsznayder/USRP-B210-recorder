@@ -1,5 +1,5 @@
-[![en](https://img.shields.io/badge/lang-en-green.svg)](https://github.com/Starsznayder/USRP-B210-recorder/README.md)
-[![pl](https://img.shields.io/badge/lang-pl-red.svg)](https://github.com/Starsznayder/USRP-B210-recorder/README.pl.md)
+[![en](https://img.shields.io/badge/lang-en-green.svg)](https://github.com/Starsznayder/USRP-B210-recorder/blob/main/README.md)
+[![pl](https://img.shields.io/badge/lang-pl-red.svg)](https://github.com/Starsznayder/USRP-B210-recorder/blob/main/README-PL.md)
 
 # B210 Recorder
 
