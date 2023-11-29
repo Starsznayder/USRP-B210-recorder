@@ -96,7 +96,7 @@ Recorder::Recorder(const std::string &fileName)
         throw ConfigFileException(e.what());
     }
 
-    _DI("Configuration", "Number of configurations loaded: " << usrp.size());
+    _KI("Configuration", "Number of configurations loaded: " << usrp.size());
 
     if (usrp.size() < 1)
     {

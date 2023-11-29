@@ -5,7 +5,7 @@
 #include <thread>
 #include <atomic>
 #include <chrono>
-#include <utu/log.h>
+#include <kittyLogs/log.h>
 #include "config/Config.h"
 #include "FileOut.h"
 
@@ -53,14 +53,14 @@ bool check_locked_sensor(std::vector<std::string> sensor_names,
         return false;
     }
 
-    bool lock_detected = false;
+    bool lock_Ketected = false;
 
     int cnt = 0;
     while (true)
     {
-        if (lock_detected)
+        if (lock_Ketected)
         {
-            _DI("USRP" + std::to_string(brdID), "[INFO][" << sensor_name << "]: locked");
+            _KI("USRP" + std::to_string(brdID), "[INFO][" << sensor_name << "]: locked");
             break;
         }
 
@@ -68,16 +68,16 @@ bool check_locked_sensor(std::vector<std::string> sensor_names,
         if (cnt >= 10)
         {
             cnt = 0;
-            _DW("USRP" + std::to_string(brdID), boost::format("Waiting for \"%s\": ") % sensor_name);
+            _KW("USRP" + std::to_string(brdID), boost::format("Waiting for \"%s\": ") % sensor_name);
         }
 
         if (get_sensor_fn(sensor_name).to_bool())
         {
-            lock_detected = true;
+            lock_Ketected = true;
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
-    return lock_detected;
+    return lock_Ketected;
 }
 
 void RecorderMagister::start(const config::Recorder& conf)
@@ -89,7 +89,7 @@ void RecorderMagister::start(const config::Recorder& conf)
 
         while(!(octoclock->get_sensor("gps_locked").to_bool()))
         {
-            _DT("Recorder", "OCTOCLOCK: " << octoclock->get_sensor("gps_locked").to_pp_string());
+            _KI("Recorder", "OCTOCLOCK: " << octoclock->get_sensor("gps_locked").to_pp_string());
             std::this_thread::sleep_for(std::chrono::seconds(2));
         }
 
@@ -101,7 +101,7 @@ void RecorderMagister::start(const config::Recorder& conf)
                 usrp_[u]->set_time_next_pps(uhd::time_spec_t(gps_time + 1));
             }
 
-            _DC("Recorder", "OCTOCLOCK: " << gps_time);
+            _KW("Recorder", "OCTOCLOCK: " << gps_time);
 
             while (preCheckAlltimers(usrp_, uhd::time_spec_t(gps_time + 1)))
             {
@@ -162,7 +162,7 @@ void RecorderMagister::start(const config::Recorder& conf)
         } while(finalCheckAlltimers(usrp_, uhd::time_spec_t(gps_time + 1)));
         for (int u = 0; u < usrp_.size(); ++u)
         {
-            _DC("Recorder", "USRP" << u <<" time: " << usrp_[u]->get_time_last_pps().get_full_secs());
+            _KW("Recorder", "USRP" << u <<" time: " << usrp_[u]->get_time_last_pps().get_full_secs());
         }
 
         stream_cmd.num_samps = size_t(0);
@@ -198,12 +198,12 @@ void RecorderMagister::start(const config::Recorder& conf)
     while((stream_cmd.time_spec - usrp_[0]->get_time_last_pps()).get_full_secs() > static_cast<double>(conf.rec.startOffset))
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-        _DT("Recorder", "Final Countdown: " << (stream_cmd.time_spec - usrp_[0]->get_time_last_pps()).get_full_secs());
+        _KI("Recorder", "Final Countdown: " << (stream_cmd.time_spec - usrp_[0]->get_time_last_pps()).get_full_secs());
     }
 
     for (unsigned r = 0; r < rxStream_.size(); ++r)
     {
-        _DT("Recorder", "Issuing stream cmd: " << r << " " << stream_cmd.time_spec.get_full_secs());
+        _KI("Recorder", "Issuing stream cmd: " << r << " " << stream_cmd.time_spec.get_full_secs());
         rxStream_[r]->issue_stream_cmd(stream_cmd);
     }
 }
@@ -218,24 +218,21 @@ void RecorderMagister::setupRxDev(const config::Usrp& conf,
     usrp_.back()->set_time_source(config::syncSource2string(syncSource));
     uhd::usrp::multi_usrp::sptr usrp = usrp_.back();
 
-    _DI("USRP" + std::to_string(usrp_.size() - 1), "[INFO][CLK]: " << config::syncSource2string(syncSource));
+    _KI("USRP" + std::to_string(usrp_.size() - 1), "[INFO][CLK]: " << config::syncSource2string(syncSource));
 
-    //std::string subdev = "";
-    //usrp->set_rx_subdev_spec(subdev);
-
-    _DI("USRP" + std::to_string(usrp_.size() - 1), boost::format("Using Device: %s") % usrp->get_pp_string());
+    _KI("USRP" + std::to_string(usrp_.size() - 1), boost::format("Using Device: %s") % usrp->get_pp_string());
 
     usrp->set_rx_rate(conf.FsRx);
-    _DI("USRP" + std::to_string(usrp_.size() - 1), "[INFO][Fs]: " << usrp->get_rx_rate(0) / 1e6);
+    _KI("USRP" + std::to_string(usrp_.size() - 1), "[INFO][Fs]: " << usrp->get_rx_rate(0) / 1e6);
 
     usrp->set_rx_freq(conf.FcRx);
-    _DI("USRP" + std::to_string(usrp_.size() - 1), "[INFO][Fc]: " << usrp->get_rx_freq(0) / 1e6);
+    _KI("USRP" + std::to_string(usrp_.size() - 1), "[INFO][Fc]: " << usrp->get_rx_freq(0) / 1e6);
 
     usrp->set_rx_gain(conf.GainRX);
-    _DI("USRP" + std::to_string(usrp_.size() - 1), "[INFO][gain]: " << usrp->get_rx_gain(0));
+    _KI("USRP" + std::to_string(usrp_.size() - 1), "[INFO][gain]: " << usrp->get_rx_gain(0));
 
     usrp->set_rx_bandwidth(conf.B);
-    _DI("USRP" + std::to_string(usrp_.size() - 1), "[INFO][B]: " << usrp->get_rx_bandwidth(0) / 1e6);
+    _KI("USRP" + std::to_string(usrp_.size() - 1), "[INFO][B]: " << usrp->get_rx_bandwidth(0) / 1e6);
 
     if (syncSource == config::SyncSource::EXTERNAL)
     {
@@ -309,7 +306,7 @@ void RecorderMagister::configThread(std::atomic<bool> *finishFlag)
         config::Recorder conf = config.recorder.get();
         if (conf.usrp != defConf.usrp || conf.signal != defConf.signal)
         {
-            _DT("Recorder", "Reconfiguring");
+            _KI("Recorder", "Reconfiguring");
             reconfigure(conf);
         }
 
@@ -334,7 +331,7 @@ void RecorderMagister::fileDataSynchronizer(std::atomic<bool> *finishFlag, FileO
 {
     config::Config& config = config::Config::getInstance();
     bool newNote = false;
-    char time_details[64];
+    char time_Ketails[64];
     while (!finishFlag->load())
     {
         std::vector<std::shared_ptr<RxData<std::complex<int16_t>>>> buffs;
@@ -351,8 +348,8 @@ void RecorderMagister::fileDataSynchronizer(std::atomic<bool> *finishFlag, FileO
             ptr->conf.rec.timestamp64 = buffs[0]->timestamp;
             std::chrono::system_clock::time_point uptime_timepoint{std::chrono::duration_cast<std::chrono::system_clock::time_point::duration>(std::chrono::nanoseconds(buffs[0]->timestamp))};
             std::time_t timeTromTimestmp = std::chrono::system_clock::to_time_t(uptime_timepoint);
-            std::strftime(time_details, 64, "%Y_%m_%d_%H_%M_%S", std::localtime(&timeTromTimestmp));
-            ptr->conf.rec.timestamp = std::string(time_details);
+            std::strftime(time_Ketails, 64, "%Y_%m_%d_%H_%M_%S", std::localtime(&timeTromTimestmp));
+            ptr->conf.rec.timestamp = std::string(time_Ketails);
             for (unsigned b = 0; b < buffs.size(); ++b)
             {
                 ptr->rawData.push_back(buffs[b]);
@@ -365,7 +362,7 @@ void RecorderMagister::fileDataSynchronizer(std::atomic<bool> *finishFlag, FileO
 
 void RecorderMagister::recorderThread(std::atomic<bool> *finishFlag, unsigned strmId, unsigned dataPartSize, double FsRx, unsigned chNum)
 {
-    _DC("Recorder", "Running Recorder Thread: " << strmId);
+    _KE("Recorder", "Running Recorder Thread: " << strmId);
     config::Config& config = config::Config::getInstance();
     config::Recorder defConf = config.recorder.get();
 
@@ -410,17 +407,17 @@ void RecorderMagister::recorderThread(std::atomic<bool> *finishFlag, unsigned st
 
         if (md.error_code == uhd::rx_metadata_t::ERROR_CODE_TIMEOUT)
         {
-            _DC("System", "Timeout while streaming on STRM: " << strmId);
+            _KE("System", "Timeout while streaming on STRM: " << strmId);
             finishFlag->store(true);
         }
         else if (md.error_code == uhd::rx_metadata_t::ERROR_CODE_OVERFLOW)
         {
-            _DW("Recorder", "uhd::rx_metadata_t::ERROR_CODE_OVERFLOW on STRM: " << strmId);
+            _KW("Recorder", "uhd::rx_metadata_t::ERROR_CODE_OVERFLOW on STRM: " << strmId);
             finishFlag->store(true);
         }
         else if (md.error_code != uhd::rx_metadata_t::ERROR_CODE_NONE)
         {
-            _DC("Recorder", "Receiver error: " << md.strerror() << " on STRM: " << strmId);
+            _KE("Recorder", "Receiver error: " << md.strerror() << " on STRM: " << strmId);
             finishFlag->store(true);
         }
 
@@ -431,8 +428,8 @@ void RecorderMagister::recorderThread(std::atomic<bool> *finishFlag, unsigned st
         {
             auto strMT2 = std::chrono::high_resolution_clock::now();
             double t = static_cast<double>(std::chrono::duration_cast<std::chrono::nanoseconds>(strMT2 - strMT).count()) / 1e9;
-            _DI("Recorder", "[INFO][Stream" << strmId << " band]: " << static_cast<double>(dataPartSize * chNum) * 32 / t / 1e6 << " Mb/s");
-            _DI("Recorder", "[INFO][Stream" << strmId << " rate]: " << static_cast<double>(dataPartSize * chNum) / t / 1e6 << " MS/s");
+            _KI("Recorder", "[INFO][Stream" << strmId << " band]: " << static_cast<double>(dataPartSize * chNum) * 32 / t / 1e6 << " Mb/s");
+            _KI("Recorder", "[INFO][Stream" << strmId << " rate]: " << static_cast<double>(dataPartSize * chNum) / t / 1e6 << " MS/s");
 
             strMT = strMT2;
             timestamp = actT - (timeOfSampleNs * (num_total_samps - 2040));
@@ -440,7 +437,7 @@ void RecorderMagister::recorderThread(std::atomic<bool> *finishFlag, unsigned st
             buffer[rxBufferCounter]->proctor.lock();
             if(buffer[rxBufferCounter]->hasFreshData)
             {
-                _DC("Recorder", "File Sync Queue overflow! : " << strmId);
+                _KE("Recorder", "File Sync Queue overflow! : " << strmId);
                 finishFlag->store(true);
             }
 
@@ -453,7 +450,7 @@ void RecorderMagister::recorderThread(std::atomic<bool> *finishFlag, unsigned st
             buffer[rxBufferCounter]->hasFreshData = true;
             buffer[rxBufferCounter]->timestamp = timestamp;
             buffer[rxBufferCounter]->proctor.unlock();
-             _DI("Recorder", "[INFO][sync queue CH" << strmId <<" size]: " << fSyncQueue_[strmId]->push_back(buffer[rxBufferCounter]));
+             _KI("Recorder", "[INFO][sync queue CH" << strmId <<" size]: " << fSyncQueue_[strmId]->push_back(buffer[rxBufferCounter]));
             ++rxBufferCounter;
             if (rxBufferCounter >= buffer.size())
             {
@@ -465,7 +462,7 @@ void RecorderMagister::recorderThread(std::atomic<bool> *finishFlag, unsigned st
     }
 
     stream_cmd.stream_mode = uhd::stream_cmd_t::STREAM_MODE_STOP_CONTINUOUS;
-    _DW("Recorder", "Issuing stop stream cmd");
+    _KW("Recorder", "Issuing stop stream cmd");
     rxStream->issue_stream_cmd(stream_cmd);
     int num_post_samps = 0;
     bufPtrs[0] = &buff[0][0];

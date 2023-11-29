@@ -26,7 +26,7 @@ namespace config
             }
             catch(const ConfigFileException &e)
             {
-                _DC("Config", e.what());
+                _KE("Config", e.what());
             }
 
             std::this_thread::sleep_for(std::chrono::seconds(1));

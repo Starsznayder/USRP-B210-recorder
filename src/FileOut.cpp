@@ -50,7 +50,7 @@ void FileOut<T>::init(const config::Recorder &config)
             }
             catch(const std::exception& e)
             {
-                 _DC("FileWritter", "Unable to create dir: " << dir);
+                 _KE("FileWritter", "Unable to create dir: " << dir);
             }
         }
     }
@@ -75,7 +75,7 @@ void FileOut<T>::addNote(const config::Recorder *config, int ch)
     }
     catch(const std::exception& e)
     {
-         _DC("FileWritter", "Unable to create note: " << *dirs[ch] + "/"  + std::to_string(config->rec.timestamp64) + ".note");
+         _KW("FileWritter", "Unable to create note: " << *dirs[ch] + "/"  + std::to_string(config->rec.timestamp64) + ".note");
     }
 }
 
@@ -86,13 +86,13 @@ void FileOut<T>::saveTofile(RxData<T>* data, int subChannel, int ch)
     {
         data->proctor.lock();
         fileStream[ch]->write(reinterpret_cast<char *>(data->data[subChannel].data()), data->data[subChannel].size() * sizeof(std::complex<int16_t>));
-        _DI("FileWritter", "[INFO][CH : " << ch << " status]: OK");
+        _KI("FileWritter", "[INFO][CH : " << ch << " status]: OK");
         data->hasFreshData = false;
         data->proctor.unlock();
     }
     else
     {
-        _DC("FileWritter", "[INFO][CH : " << ch << " status]: ERROR");
+        _KE("FileWritter", "[INFO][CH : " << ch << " status]: ERROR");
     }
 }
 

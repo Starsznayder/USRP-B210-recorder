@@ -5,7 +5,7 @@
 static std::atomic<bool> finishFlag(false);
 
 void signalHandler( int signum ) {
-    _DC("main", "Interrupt signal (" << signum << ") received");
+    _KW("main", "Interrupt signal (" << signum << ") received");
     finishFlag.store(true);
     std::this_thread::sleep_for(std::chrono::seconds(2));
     exit(signum);
@@ -16,16 +16,14 @@ int main()
     finishFlag.store(false);
 
     try{
-        utu::logger::init(utu::logger::consoleSink);
+        kittyLogs::logger::init(kittyLogs::logger::consoleSink);
 
         config::Config& conf = config::Config::getInstance();
         conf.init("ini", finishFlag);
 
-
-        /*utu::logger::init(utu::logger::networkSink,
-                          conf.network.get().logs.addr,
-                          conf.network.get().logs.port);*/
-        utu::logger::setProcess("main");
+        /*kittyLogs::logger::init(kittyLogs::logger::networkSink,
+								conf.network.get().logs.addr,
+								conf.network.get().logs.port);*/
 
         signal(SIGKILL, signalHandler);
         signal(SIGTERM, signalHandler);
@@ -42,7 +40,7 @@ int main()
     }
     catch(const config::ConfigFileException &e)
     {
-        _DC("main", e.what());
+        _KE("main", e.what());
         return -1;
     }
 }

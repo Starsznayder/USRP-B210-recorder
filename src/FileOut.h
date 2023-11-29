@@ -7,7 +7,7 @@
 #include <vector>
 #include <future>
 #include <config/Config.h>
-#include <utu/log.h>
+#include <kittyLogs/log.h>
 #include "SafeQueue.h"
 
 namespace fs = std::experimental::filesystem;
@@ -109,7 +109,7 @@ public:
                         f.wait();
                     }
                     recConfig.rec.notes = data->conf.rec.notes;
-                    _DI("FileWritter", "[INFO][" << data->conf.rec.timestamp64 << "]: " << data->conf.rec.notes);
+                    _KI("FileWritter", "[INFO][" << data->conf.rec.timestamp64 << "]: " << data->conf.rec.notes);
                 }
 
                 int ch = 0;
@@ -136,7 +136,7 @@ public:
             {
                 fileStream[i]->flush();
                 fileStream[i]->close();
-                _DI("FileWritter", "[INFO][CH : " << i << " status]: DONE!");
+                _KI("FileWritter", "[INFO][CH : " << i << " status]: DONE!");
             }
         }
     }
